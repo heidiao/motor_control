@@ -2,10 +2,11 @@
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/gpio.h>
+#include <linux/interrupt.h>
+#include <linux/gpio_keys.h>
 
 
 /*
-#include <linux/interrupt.h>
 
     int gpio_is_valid(int number);
     int gpio_direction_input(unsigned gpio);
@@ -20,7 +21,6 @@
     // release previously-claimed GPIO 
     void gpio_free(unsigned gpio);
 
-*/
 struct mgpio {
     unsigned    gpio;
     unsigned long   flags;
@@ -28,17 +28,24 @@ struct mgpio {
 };
 
 static struct mgpio motor_gpios[] = {
-    { 15, GPIOF_OUT_INIT_LOW,  "Motor P9_15" }, /* default to OFF */
-    { 16, GPIOF_OUT_INIT_LOW,  "Motor P9_16"   }, /* default to OFF */
+    { 48, GPIOF_OUT_INIT_LOW,  "Motor P9_15" }, // default to OFF 
+    { 51, GPIOF_OUT_INIT_LOW,  "Motor P9_16"   }, // default to OFF 
 };
+*/
 
 
 static int __init bbb_l293d_init(void)
 {
     int err;
-    err = gpio_request_array(motor_gpios, ARRAY_SIZE(motor_gpios));
-    if (err)
-        gpio_free_array(motor_gpios, ARRAY_SIZE(motor_gpios));
+//    err = gpio_request_array(motor_gpios, ARRAY_SIZE(motor_gpios));
+ //   if (err)
+  //      gpio_free_array(motor_gpios, ARRAY_SIZE(motor_gpios));
+    err = gpio_request(48, "P9_15");
+    err = gpio_request(51, "P9_16");
+    gpio_direction_output(48,0);
+    gpio_direction_output(51,0);
+    err=gpio_export(48, true);
+    err=gpio_export(51, true);
 
     return true;
    // return i2c_add_driver(&mxt_driver);
@@ -46,7 +53,11 @@ static int __init bbb_l293d_init(void)
 
 static void __exit bbb_l293d_exit(void)
 {
-    gpio_free_array(motor_gpios, ARRAY_SIZE(motor_gpios));
+    gpio_unexport(48);
+    gpio_unexport(51);
+    gpio_free(48);
+    gpio_free(51);
+//    gpio_free_array(motor_gpios, ARRAY_SIZE(motor_gpios));
 //    i2c_del_driver(&mxt_driver);
 }
 
